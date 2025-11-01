@@ -5,6 +5,8 @@ const morgan = require('morgan');
 const connectDB = require('./src/config/database');
 const errorHandler = require('./src/middleware/errorHandler');
 const authRoutes = require('./src/routes/authRoutes');
+const expenseRoutes = require('./src/routes/expenseRoutes');
+const uploadRoutes = require('./src/routes/uploadRoutes');
 
 // Connect to database
 connectDB();
@@ -18,6 +20,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 
+// Serve static files from uploads directory
+app.use('/uploads', express.static('uploads'));
+
 // Routes
 app.get('/', (req, res) => {
   res.json({
@@ -27,6 +32,8 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/', expenseRoutes);
+app.use('/', uploadRoutes);
 
 // Error handler middleware (should be last)
 app.use(errorHandler);

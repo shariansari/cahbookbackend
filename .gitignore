@@ -5,3 +5,7 @@ node_modules/
 coverage/
 dist/
 build/
+
+# Uploads directory - ignore all files except .gitkeep
+uploads/*
+!uploads/.gitkeep
