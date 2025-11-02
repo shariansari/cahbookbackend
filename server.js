@@ -1,12 +1,18 @@
 const dotenv = require('dotenv');
 const path = require('path');
 
-// Load environment variables
+// Load environment variables from .env file if it exists
+// In production/Docker, environment variables may be provided directly
 const result = dotenv.config({ path: path.join(__dirname, '.env') });
 
 if (result.error) {
-  console.error('Error loading .env file:', result.error);
-  process.exit(1);
+  if (result.error.code === 'ENOENT') {
+    console.warn('Warning: .env file not found. Using environment variables from system.');
+    console.warn('Make sure required environment variables (MONGODB_URI, JWT_SECRET, etc.) are set.');
+  } else {
+    console.error('Error loading .env file:', result.error);
+    process.exit(1);
+  }
 }
 
 const express = require('express');
