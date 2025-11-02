@@ -3,7 +3,7 @@ const User = require('../models/User');
 // Register a new user
 const register = async (req, res, next) => {
   try {
-    const { name, email, password, phone, role, gender } = req.body;
+    const { name, email, password, phone, roleId, gender } = req.body;
 
     // Check if user already exists with email or phone
     const query = [];
@@ -30,9 +30,12 @@ const register = async (req, res, next) => {
       email,
       password,
       phone,
-      role,
+      roleId,
       gender,
     });
+
+    // Populate roleId
+    await user.populate('roleId');
 
     // Generate token
     const token = user.generateToken();
@@ -48,7 +51,7 @@ const register = async (req, res, next) => {
           name: user.name,
           email: user.email,
           phone: user.phone,
-          role: user.role,
+          roleId: user.roleId,
           gender: user.gender,
         },
       },
@@ -74,7 +77,7 @@ const login = async (req, res, next) => {
 
     // Find user by email or phone and include password field
     const query = email ? { email } : { phone };
-    const user = await User.findOne(query).select('+password');
+    const user = await User.findOne(query).select('+password').populate('roleId');
 
     if (!user) {
       return res.status(401).json({
@@ -110,8 +113,7 @@ const login = async (req, res, next) => {
           phone: user.phone,
           name: user?.name,
           gender: user?.gender,
-          role: user?.role,
-
+          roleId: user?.roleId,
         },
       },
     });
@@ -123,7 +125,7 @@ const login = async (req, res, next) => {
 // Get current logged in user (POST method)
 const getMe = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id).populate('roleId');
 
     res.status(200).json({
       success: true,
@@ -143,6 +145,7 @@ const searchUser = async (req, res) => {
       limit: parseInt(req.body.limit) || 10,
       sort: req.body.sort || { createdAt: -1 },
       select: '-password',
+      populate: 'roleId',
     };
 
     const users = await User.paginate(req.body.search || {}, options);
@@ -169,7 +172,7 @@ const updateUser = async (req, res) => {
       return res.status(400).json({ error: 'User ID is required' });
     }
 
-    const user = await User.findByIdAndUpdate(_id, req.body, { new: true });
+    const user = await User.findByIdAndUpdate(_id, req.body, { new: true }).populate('roleId');
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }

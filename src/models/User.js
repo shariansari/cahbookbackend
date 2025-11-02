@@ -23,8 +23,9 @@ const userSchema = new mongoose.Schema({
     unique: true,
     sparse: true,
   },
-  role: {
-    type: String,
+  roleId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Role',
   },
   gender: {
     type: String,

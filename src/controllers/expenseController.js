@@ -15,7 +15,13 @@ const addExpense = async (req, res, next) => {
       reimbursement,
       description,
       proofUrl,
-      user: req.user.id,
+      userId: req.user.id,
+    });
+
+    // Populate user details
+    await expense.populate({
+      path: 'userId',
+      select: 'name email',
     });
 
     res.status(201).json({
@@ -36,10 +42,14 @@ const getExpenses = async (req, res, next) => {
       page: parseInt(req.body.page) || 1,
       limit: parseInt(req.body.limit) || 10,
       sort: req.body.sort || { createdAt: -1 },
+      populate: {
+        path: 'userId',
+        select: 'name email',
+      },
     };
 
     // Build query - only get expenses for the authenticated user
-    const query = { user: req.user.id, ...req.body.search };
+    const query = { userId: req.user.id, ...req.body.search };
 
     const expenses = await Expense.paginate(query, options);
 
@@ -66,7 +76,10 @@ const getExpense = async (req, res, next) => {
       });
     }
 
-    const expense = await Expense.findOne({ _id, user: req.user.id });
+    const expense = await Expense.findOne({ _id, userId: req.user.id }).populate({
+      path: 'userId',
+      select: 'name email',
+    });
 
     if (!expense) {
       return res.status(404).json({
@@ -100,7 +113,7 @@ const updateExpense = async (req, res, next) => {
     }
 
     // Find expense by ID and user to ensure user owns this expense
-    const expense = await Expense.findOne({ _id, user: req.user.id });
+    const expense = await Expense.findOne({ _id, userId: req.user.id });
 
     if (!expense) {
       return res.status(404).json({
@@ -114,6 +127,9 @@ const updateExpense = async (req, res, next) => {
     const updatedExpense = await Expense.findByIdAndUpdate(_id, updateData, {
       new: true,
       runValidators: true,
+    }).populate({
+      path: 'userId',
+      select: 'name email',
     });
 
     res.status(200).json({
@@ -141,7 +157,7 @@ const deleteExpense = async (req, res, next) => {
     }
 
     // Find expense by ID and user to ensure user owns this expense
-    const expense = await Expense.findOne({ _id, user: req.user.id });
+    const expense = await Expense.findOne({ _id, userId: req.user.id });
 
     if (!expense) {
       return res.status(404).json({
@@ -170,10 +186,14 @@ const searchExpense = async (req, res, next) => {
       page: parseInt(req.body.page) || 1,
       limit: parseInt(req.body.limit) || 10,
       sort: req.body.sort || { createdAt: -1 },
+      populate: {
+        path: 'userId',
+        select: 'name email',
+      },
     };
 
     // Build query - only get expenses for the authenticated user
-    const query = { user: req.user.id, ...req.body.search };
+    const query = { userId: req.user.id, ...req.body.search };
 
     const expenses = await Expense.paginate(query, options);
 
@@ -193,7 +213,7 @@ const getExpenseStats = async (req, res, next) => {
     const { startDate, endDate } = req.body;
 
     // Build query
-    const query = { user: req.user.id };
+    const query = { userId: req.user.id };
 
     if (startDate || endDate) {
       query.date = {};

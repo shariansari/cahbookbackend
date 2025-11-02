@@ -7,6 +7,7 @@ const errorHandler = require('./src/middleware/errorHandler');
 const authRoutes = require('./src/routes/authRoutes');
 const expenseRoutes = require('./src/routes/expenseRoutes');
 const uploadRoutes = require('./src/routes/uploadRoutes');
+const roleRoutes = require('./src/routes/roleRoutes');
 
 // Connect to database
 connectDB();
@@ -34,6 +35,7 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/', expenseRoutes);
 app.use('/', uploadRoutes);
+app.use('/', roleRoutes);
 
 // Error handler middleware (should be last)
 app.use(errorHandler);
