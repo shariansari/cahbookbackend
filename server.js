@@ -1,4 +1,14 @@
-require('dotenv').config();
+const dotenv = require('dotenv');
+const path = require('path');
+
+// Load environment variables
+const result = dotenv.config({ path: path.join(__dirname, '.env') });
+
+if (result.error) {
+  console.error('Error loading .env file:', result.error);
+  process.exit(1);
+}
+
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
