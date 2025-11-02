@@ -2,7 +2,7 @@ const dotenv = require('dotenv');
 const path = require('path');
 
 // Load environment variables from .env file if it exists
-// In production/Docker, environment variables may be provided directly
+// In production/Docker/Railway, environment variables may be provided directly
 const result = dotenv.config({ path: path.join(__dirname, '.env') });
 
 if (result.error) {
@@ -24,6 +24,23 @@ const authRoutes = require('./src/routes/authRoutes');
 const expenseRoutes = require('./src/routes/expenseRoutes');
 const uploadRoutes = require('./src/routes/uploadRoutes');
 const roleRoutes = require('./src/routes/roleRoutes');
+
+// Validate required environment variables
+const requiredEnvVars = ['MONGODB_URI', 'JWT_SECRET'];
+const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
+
+if (missingEnvVars.length > 0) {
+  console.error('\n❌ ERROR: Missing required environment variables:');
+  missingEnvVars.forEach(varName => {
+    console.error(`   - ${varName}`);
+  });
+  console.error('\n📝 If deploying to Railway.app, Docker, or other platforms:');
+  console.error('   Set these variables in your platform\'s dashboard or configuration.');
+  console.error('\n📝 For local development:');
+  console.error('   Make sure you have a .env file with all required variables.');
+  console.error('   Copy .env.example to .env and fill in your values.\n');
+  process.exit(1);
+}
 
 // Connect to database
 connectDB();
