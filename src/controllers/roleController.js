@@ -24,7 +24,14 @@ class RoleController {
         sort: req.body.sort || { createdAt: -1 },
         select: req.body.select || ""
       };
-      const roles = await Role.paginate(req.body.search, options);
+
+      // Build query to exclude SuperAdmin role
+      const query = {
+        ...req.body.search,
+        roleName: { $ne: 'SuperAdmin' }
+      };
+
+      const roles = await Role.paginate(query, options);
       res.json({ statusCode: 200, data: roles });
 
     } catch (error) {

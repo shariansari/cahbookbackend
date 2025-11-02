@@ -140,6 +140,11 @@ const getMe = async (req, res, next) => {
 // Search user by email or phone with pagination (POST method)
 const searchUser = async (req, res) => {
   try {
+    const Role = require('../models/Role');
+
+    // Find SuperAdmin role ID
+    const superAdminRole = await Role.findOne({ roleName: 'SuperAdmin' });
+
     const options = {
       page: parseInt(req.body.page) || 1,
       limit: parseInt(req.body.limit) || 10,
@@ -148,7 +153,16 @@ const searchUser = async (req, res) => {
       populate: 'roleId',
     };
 
-    const users = await User.paginate(req.body.search || {}, options);
+    // Build query to exclude users with SuperAdmin role
+    const query = {
+      ...req.body.search,
+    };
+
+    if (superAdminRole) {
+      query.roleId = { $ne: superAdminRole._id };
+    }
+
+    const users = await User.paginate(query, options);
 
     res.status(200).json({
       success: true,

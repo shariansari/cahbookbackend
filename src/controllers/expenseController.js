@@ -48,8 +48,8 @@ const getExpenses = async (req, res, next) => {
       },
     };
 
-    // Build query - only get expenses for the authenticated user
-    const query = { userId: req.user.id, ...req.body.search };
+    // Build query - get all expenses with optional search filters
+    const query = { ...req.body.search };
 
     const expenses = await Expense.paginate(query, options);
 
@@ -192,8 +192,8 @@ const searchExpense = async (req, res, next) => {
       },
     };
 
-    // Build query - only get expenses for the authenticated user
-    const query = { userId: req.user.id, ...req.body.search };
+    // Build query - get all expenses with optional search filters
+    const query = { ...req.body.search };
 
     const expenses = await Expense.paginate(query, options);
 
