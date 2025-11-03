@@ -27,6 +27,10 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Role',
   },
+  accountId: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Account',
+  }],
   gender: {
     type: String,
   },

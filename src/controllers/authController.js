@@ -3,7 +3,7 @@ const User = require('../models/User');
 // Register a new user
 const register = async (req, res, next) => {
   try {
-    const { name, email, password, phone, roleId, gender } = req.body;
+    const { name, email, password, phone, roleId, gender, accountId } = req.body;
 
     // Check if user already exists with email or phone
     const query = [];
@@ -32,10 +32,11 @@ const register = async (req, res, next) => {
       phone,
       roleId,
       gender,
+      accountId,
     });
 
-    // Populate roleId
-    await user.populate('roleId');
+    // Populate roleId and accountId
+    await user.populate(['roleId', 'accountId']);
 
     // Generate token
     const token = user.generateToken();
@@ -53,6 +54,7 @@ const register = async (req, res, next) => {
           phone: user.phone,
           roleId: user.roleId,
           gender: user.gender,
+          accountId: user.accountId,
         },
       },
     });
@@ -77,7 +79,7 @@ const login = async (req, res, next) => {
 
     // Find user by email or phone and include password field
     const query = email ? { email } : { phone };
-    const user = await User.findOne(query).select('+password').populate('roleId');
+    const user = await User.findOne(query).select('+password').populate(['roleId', 'accountId']);
 
     if (!user) {
       return res.status(401).json({
@@ -114,6 +116,7 @@ const login = async (req, res, next) => {
           name: user?.name,
           gender: user?.gender,
           roleId: user?.roleId,
+          accountId: user?.accountId,
         },
       },
     });
@@ -125,7 +128,7 @@ const login = async (req, res, next) => {
 // Get current logged in user (POST method)
 const getMe = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user.id).populate('roleId');
+    const user = await User.findById(req.user.id).populate(['roleId', 'accountId']);
 
     res.status(200).json({
       success: true,
@@ -150,7 +153,7 @@ const searchUser = async (req, res) => {
       limit: parseInt(req.body.limit) || 10,
       sort: req.body.sort || { createdAt: -1 },
       select: '-password',
-      populate: 'roleId',
+      populate: ['roleId', 'accountId'],
     };
 
     // Build query to exclude users with SuperAdmin role

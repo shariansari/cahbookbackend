@@ -21,9 +21,11 @@ const morgan = require('morgan');
 const connectDB = require('./src/config/database');
 const errorHandler = require('./src/middleware/errorHandler');
 const authRoutes = require('./src/routes/authRoutes');
-const expenseRoutes = require('./src/routes/expenseRoutes');
 const uploadRoutes = require('./src/routes/uploadRoutes');
 const roleRoutes = require('./src/routes/roleRoutes');
+const accountRoutes = require('./src/routes/accountRoutes');
+const cashbookRecordRoutes = require('./src/routes/cashRecordRoutes');
+
 
 // Validate required environment variables
 const requiredEnvVars = ['MONGODB_URI', 'JWT_SECRET'];
@@ -66,9 +68,11 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
-app.use('/', expenseRoutes);
 app.use('/', uploadRoutes);
 app.use('/', roleRoutes);
+app.use('/', accountRoutes);
+app.use('/', cashbookRecordRoutes);
+
 
 // Error handler middleware (should be last)
 app.use(errorHandler);
