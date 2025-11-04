@@ -53,7 +53,20 @@ const searchCashRecords = async (req, res, next) => {
       limit: parseInt(req.body.limit) || 10,
       sort: req.body.sort || { createdAt: -1 },
       populate: [
-        { path: 'userId', select: 'name email' },
+        {
+          path: 'userId',
+          select: 'name email phone gender roleId accountId',
+          populate: [
+            {
+              path: 'roleId',
+              select: 'roleName allowedEndPoints permission status createdAt updatedAt'
+            },
+            {
+              path: 'accountId',
+              select: 'accountName status createdAt updatedAt'
+            }
+          ]
+        },
         { path: 'accountId', select: 'accountName status' },
       ],
     };
@@ -205,11 +218,9 @@ const getCashRecordStats = async (req, res, next) => {
 
     const query = {};
 
-    // ✅ Add userId filter (from search or token)
+    // ✅ Add userId filter only if explicitly provided in search
     if (search?.userId && mongoose.Types.ObjectId.isValid(search.userId)) {
       query.userId = new mongoose.Types.ObjectId(search.userId);
-    } else if (req.user?.id) {
-      query.userId = new mongoose.Types.ObjectId(req.user.id);
     }
 
     // ✅ Add accountId filter if valid
