@@ -100,10 +100,16 @@ const searchCashRecord = async (req, res, next) => {
       });
     }
 
-    const record = await CashRecord.findOne({
-      _id,
-      userId: req.user.id,
-    }).populate([
+    // Check if user is SuperAdmin
+    const isSuperAdmin = req.user.roleId?.roleName === 'SuperAdmin';
+
+    // Build query - SuperAdmin can view any record, others only their own
+    const query = { _id };
+    if (!isSuperAdmin) {
+      query.userId = req.user.id;
+    }
+
+    const record = await CashRecord.findOne(query).populate([
       { path: 'userId', select: 'name email' },
       { path: 'accountId', select: 'accountName status' },
     ]);
@@ -141,7 +147,16 @@ const updateCashRecord = async (req, res, next) => {
       });
     }
 
-    const record = await CashRecord.findOne({ _id, userId: req.user.id });
+    // Check if user is SuperAdmin
+    const isSuperAdmin = req.user.roleId?.roleName === 'SuperAdmin';
+
+    // Build query - SuperAdmin can update any record, others only their own
+    const query = { _id };
+    if (!isSuperAdmin) {
+      query.userId = req.user.id;
+    }
+
+    const record = await CashRecord.findOne(query);
 
     if (!record) {
       return res.status(404).json({
@@ -187,7 +202,16 @@ const deleteCashRecord = async (req, res, next) => {
       });
     }
 
-    const record = await CashRecord.findOne({ _id, userId: req.user.id });
+    // Check if user is SuperAdmin
+    const isSuperAdmin = req.user.roleId?.roleName === 'SuperAdmin';
+
+    // Build query - SuperAdmin can delete any record, others only their own
+    const query = { _id };
+    if (!isSuperAdmin) {
+      query.userId = req.user.id;
+    }
+
+    const record = await CashRecord.findOne(query);
 
     if (!record) {
       return res.status(404).json({

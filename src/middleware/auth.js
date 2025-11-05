@@ -24,8 +24,8 @@ const protect = async (req, res, next) => {
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Get user from token
-    req.user = await User.findById(decoded.id);
+    // Get user from token with populated roleId
+    req.user = await User.findById(decoded.id).populate('roleId');
 
     if (!req.user) {
       return res.status(401).json({
